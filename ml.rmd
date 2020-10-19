@@ -1,0 +1,142 @@
+---
+title: "Blank_R_Markdown"
+author: "Shanmukh"
+date: "September 25, 2018"
+output: html_document
+---
+
+
+```{r}
+library (keras)
+library (EBImage)
+```
+```{r}
+pics <- c("one.jpg","two.jpg","three.jpg","four.jpg","five.jpg")
+
+
+pics
+```
+```{r}
+myimage <- list()
+for(i in 1:5){
+  myimage[[i]] <- readImage(pics[i])
+}
+
+print(myimage[[1]])
+display(myimage[[i]])
+```
+```{r}
+for(i in 1:5){
+  myimage[[i]] <- resize(myimage[[i]],28,28)
+}
+
+str(myimage)
+
+```
+
+
+
+```{r}
+for(i in 1:5){
+  myimage[[i]] <- array_reshape(myimage[[i]],c(28,28,3))
+}
+display(myimage[[1]])
+
+```
+```{r}
+
+train <- rbind(myimage[[1]],myimage[[2]],myimage[[4]])
+dim(train)
+```
+
+```{r}
+test <- rbind(myimage[[3]],myimage[[5]])
+dim(test)
+```
+
+```{r}
+train_labels <- c(1,1,0)
+test_labels <- c(1,0)
+
+```
+
+
+```{r}
+
+train_labels
+```
+```{r}
+library(randomForest)
+library(ggplot2)
+library(dplyr)
+library(datasets)
+
+library(caret)
+library(caTools)
+library(tensorflow)
+library (keras)
+
+
+
+
+```
+
+
+```{r}
+train_labels <- to_categorical(train_labels)
+test_labels <- to_categorical(test_labels)
+
+train_labels
+test_labels
+```
+
+```{r}
+model <- keras_model_sequential()
+model %>%
+  layer_dense(units = 256,activation = "relu",
+  input_shape = c(2352))%>%
+  
+  layer_dense(units = 128,activation = "relu")%>%
+  layer_dense(units = 2, activation = "softmax")
+summary(model)
+```
+
+```{r}
+model%>%
+  compile(loss = "binary_crossentropy",
+          optimizer = optimizer_rmsprop(),
+          metrics = c("accuracy"))
+history <- model%>%
+  fit(train,
+      train_labels,
+      epochs = 30,
+      batch_size = 32,
+      validation_split = .2)
+plot(history)
+```
+
+
+```{r}
+model%>%
+  evaluate(train,train_labels)
+```
+```{r}
+pre <-model%>%
+  predict_classes(train)
+pre
+```
+```{r}
+model%>%
+  evaluate(test,test_labels)
+```
+```{r}
+pred <-model%>%
+  predict_classes(test)
+pred
+```
+
+```{r}
+model %>%
+  evaluate(test,test_labels)
+```
+
